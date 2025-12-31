@@ -24,8 +24,6 @@ static void eeprom_update(uint16_t i, uint8_t d) { eeprom_data[i] = d; }
 #if !defined(ARDUINO)
 #if GEN_FXSAVE
 static uint8_t FX_SAVE[4096 * 2];
-#else
-#include <FX_SAVE.hpp>
 #endif
 #endif
 

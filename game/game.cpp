@@ -11,9 +11,6 @@
 
 #include "fx_courses.hpp"
 
-#ifndef ARDUINO
-#include <FX_DATA.hpp>
-#endif
 
 void fx_read_data_bytes(uint24_t addr, uint8_t* dst, size_t n)
 {
@@ -128,8 +125,6 @@ static uint8_t get_par(uint8_t i)
 static void draw_nframe_progress(uint8_t oy, uint8_t n)
 {
     constexpr uint8_t R = 9 * FB_FRAC_COEF;
-    int8_t fs = 0;
-    int8_t fc = 127;
     dvec2 vc;
     vc.x = 117 * FB_FRAC_COEF;
     vc.y = oy * FB_FRAC_COEF;
@@ -414,6 +409,7 @@ STATE LOGIC
 
 static void state_title(uint8_t btns, uint8_t pressed)
 {
+    UNUSED(btns);
 #if DEBUG_TITLE_CAM
     // enable this block to adjust camera view at title screen
 
@@ -503,6 +499,7 @@ static void state_title(uint8_t btns, uint8_t pressed)
 
 static void state_overview(uint8_t btns, uint8_t pressed)
 {
+    UNUSED(btns);
     update_camera_look_at_fastangle(
         { 0, 0, 0 }, yaw_level, 6000, 256 * 28, 64, 64);
     yaw_level += 256;
@@ -515,6 +512,7 @@ static void state_overview(uint8_t btns, uint8_t pressed)
 
 static void state_level(uint8_t btns, uint8_t pressed)
 {
+    UNUSED(btns);
     reset_ball();
     update_camera_look_at_fastangle(
         { 0, 0, 0 }, yaw_level, 6000, 256 * 28, 64, 64);
@@ -593,6 +591,8 @@ static void state_aim(uint8_t btns, uint8_t pressed)
 
 static void state_rolling(uint8_t btns, uint8_t pressed)
 {
+    UNUSED(btns);
+    UNUSED(pressed);
     if(physics_step())
     {
         yaw_aim = yaw_to_flag();
@@ -624,6 +624,7 @@ static void state_rolling(uint8_t btns, uint8_t pressed)
 
 static void state_hole(uint8_t btns, uint8_t pressed)
 {
+    UNUSED(btns);
     dvec3 flag = levelext.flag_pos;
     update_camera_look_at_fastangle(flag, yaw_aim, 6000, 256 * 20, 64, 64);
     yaw_aim += 256;
@@ -638,6 +639,7 @@ static void state_hole(uint8_t btns, uint8_t pressed)
 
 static void state_score(uint8_t btns, uint8_t pressed)
 {
+    UNUSED(pressed);
 #if 1
     // update save file
     // save after first rendered frame so any delay isn't noticeable
@@ -701,6 +703,7 @@ static void state_score(uint8_t btns, uint8_t pressed)
 
 static void state_menu(uint8_t btns, uint8_t pressed)
 {
+    UNUSED(btns);
     update_camera_behind_ball();
 
     uint8_t n = practice ? 3 : 2;
@@ -751,6 +754,7 @@ static void state_pitch(uint8_t btns, uint8_t pressed)
 
 static void state_hiscores(uint8_t btns, uint8_t pressed)
 {
+    UNUSED(btns);
 #if ARDUGOLF_FX
     if(pressed & (BTN_UP | BTN_LEFT))
         set_course(fx_course == 0 ? NUM_COURSES - 1 : fx_course - 1);
@@ -808,6 +812,7 @@ static void state_hiscores(uint8_t btns, uint8_t pressed)
 #if ARDUGOLF_FX
 static void state_fx_course(uint8_t btns, uint8_t pressed)
 {
+        UNUSED(btns);
     reset_ball();
     update_camera_look_at_fastangle(
         { 0, -12 * 256, 0 }, yaw_level, 6000, 256 * 40, 64, 64);
@@ -889,7 +894,7 @@ static void state_fx_course(uint8_t btns, uint8_t pressed)
         set_course(fx_course == NUM_COURSES - 1 ? 0 : fx_course + 1);
     if(practice && (pressed & BTN_LEFT))
         leveli = (leveli == 0 ? NUM_LEVELS - 1 : leveli - 1);
-    if(practice && (pressed & BTN_RIGHT) || !practice && (nframe & 0x3f) == 0x3f)
+    if( (practice && (pressed & BTN_RIGHT)) || (!practice && ((nframe & 0x3f) == 0x3f)) )
         leveli = (leveli == NUM_LEVELS - 1 ? 0 : leveli + 1);
 
     if(ab_btn_wait < 8)

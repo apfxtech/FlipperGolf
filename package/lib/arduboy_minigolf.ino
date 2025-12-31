@@ -3,8 +3,8 @@
 #include <SPI.h>
 #include <EEPROM.h>
 #include <Arduboy2.h>
-#include <ArduboyTones.h>
-#include <Arduino.h>
+#include "lib/ArduboyTones.h"
+#include "lib/Arduino.h"
 
 #if ARDUGOLF_FX
 #include "fx_courses.hpp"

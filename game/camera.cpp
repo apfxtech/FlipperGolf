@@ -90,6 +90,6 @@ void update_camera_follow_ball(
 
 void update_camera_reset_velocities()
 {
-    for(auto c : ctrl_cam)
+    for(auto& c : ctrl_cam)
         c.dydt = 0;
 }

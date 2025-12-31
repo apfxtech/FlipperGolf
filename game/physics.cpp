@@ -157,8 +157,7 @@ static void physics_collision(phys_box const& b)
     if(normdot > 0)
         return;
 
-    if(normdot < -256 * 4)
-        play_tone(120, 50);
+    if(normdot < -256 * 4){play_tone(120, 50);}
 
     // attempt to resolve penetration
 #if 0

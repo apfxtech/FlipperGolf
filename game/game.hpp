@@ -7,6 +7,9 @@
 static constexpr int FBW = 1 * 128;
 static constexpr int FBH = 1 * 64;
 
+#define ARDUINO 1
+#define DEBUG_SERIAL 0
+
 #ifndef ARDUGOLF_FX
 #define ARDUGOLF_FX 1
 #endif
@@ -64,14 +67,14 @@ static constexpr int FBR = FBH / 8;
 
 #ifdef ARDUINO
 
-#include <Arduino.h>
+#include "lib/Arduino.h"
 
-#include <ArduboyTones.h>
+#include "lib/ArduboyTones.h"
 extern ArduboyTones sound;
 #define play_tone sound.tone
 
 #if ARDUGOLF_FX
-#include "ArduboyFX.h"
+#include "lib/ArduboyFX.h"
 #endif
 
 #define myassert(...)
@@ -162,21 +165,13 @@ inline uint8_t u8max(uint8_t a, uint8_t b)
 // 1.7 x 1.7 -> 1.15
 static FORCEINLINE int16_t fmuls(int8_t x, int8_t y)
 {
-#ifdef ARDUINO
-    return __builtin_avr_fmuls(x, y);
-#else
     return (x * y) << 1;
-#endif
 }
 
 // 1.7 x 1.7 -> 1.7
 static FORCEINLINE int8_t fmuls8(int8_t x, int8_t y)
 {
-#ifdef ARDUINO
-    return int8_t((uint16_t)__builtin_avr_fmuls(x, y) >> 8);
-#else
     return int8_t((x * y) >> 7);
-#endif
 }
 
 static constexpr uint8_t BTN_UP    = 0x80;
@@ -188,7 +183,7 @@ static constexpr uint8_t BTN_B     = 0x04;
 
 static constexpr size_t BUF_BYTES = FBW * FBH / 8;
 #ifdef ARDUINO
-extern uint8_t* const buf;
+extern uint8_t* buf;
 #else
 extern array<uint8_t, BUF_BYTES> buf;
 #endif
@@ -196,7 +191,7 @@ extern array<uint8_t, BUF_BYTES> buf;
 static constexpr int16_t BALL_RADIUS = 256 * 0.5;
 static constexpr int16_t FLAG_RADIUS = 256 * 1.0;
 
-#ifdef ARDUINO
+#if defined(__AVR__) && defined(ARDUINO)
 using int24_t = __int24;
 using uint24_t = __uint24;
 using s24 = int24_t;
@@ -212,40 +207,40 @@ static int24_t s24(T x)
 {
     return int24_t(x);
 }
-static int24_t s24(uint32_t x)
-{
-    myassert((x & 0xff800000) == 0);
-    return int24_t(x);
-}
-static int24_t s24(int32_t x)
-{
-    if(x & 0x800000)
-        myassert((x & 0xff000000) == 0xff000000);
-    else
-        myassert((x & 0xff000000) == 0);
-    return int24_t(x);
-}
+// static int24_t s24(uint32_t x)
+// {
+//     myassert((x & 0xff800000) == 0);
+//     return int24_t(x);
+// }
+// static int24_t s24(int32_t x)
+// {
+//     if(x & 0x800000)
+//         myassert((x & 0xff000000) == 0xff000000);
+//     else
+//         myassert((x & 0xff000000) == 0);
+//     return int24_t(x);
+// }
 
 template<class T>
 static uint24_t u24(T x)
 {
     return uint24_t(x);
 }
-static uint24_t u24(uint32_t x)
-{
-    myassert((x & 0xff000000) == 0);
-    return uint24_t(x);
-}
-static uint24_t u24(int32_t x)
-{
-    if(x & 0x800000)
-        myassert((x & 0xff000000) == 0xff000000);
-    else
-        myassert((x & 0xff000000) == 0);
-    return uint24_t(x);
-}
-static uint24_t u24(int16_t x) { return u24(int32_t(x)); }
-static uint24_t u24(int8_t x) { return u24(int32_t(x)); }
+// static uint24_t u24(uint32_t x)
+// {
+//     myassert((x & 0xff000000) == 0);
+//     return uint24_t(x);
+// }
+// static uint24_t u24(int32_t x)
+// {
+//     if(x & 0x800000)
+//         myassert((x & 0xff000000) == 0xff000000);
+//     else
+//         myassert((x & 0xff000000) == 0);
+//     return uint24_t(x);
+// }
+// static uint24_t u24(int16_t x) { return u24(int32_t(x)); }
+// static uint24_t u24(int8_t x) { return u24(int32_t(x)); }
 #endif
 
 struct vec2  { int8_t  x, y; };

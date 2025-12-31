@@ -61,7 +61,6 @@ void set_number3(uint16_t n, uint8_t r, uint8_t c)
         n -= 100, ++t0;
     while(n >= 10)
         n -= 10, ++t1;
-    uint8_t x = c;
     if(t0 != 0)
     {
         set_number(t0, r, c);

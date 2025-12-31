@@ -11,8 +11,6 @@ static constexpr uint8_t FLAG_SIZE = 2;
 static constexpr uint8_t FLAG_POLE_PAT = 4; // 3? more visible against flat
 static constexpr uint8_t FLAG_PAT = 3;
 
-static uint8_t flag_anim = 0;
-
 array<face, MAX_FACES> fs;
 array<uint8_t, MAX_FACES> forder;
 array<dvec2, MAX_VERTS> vs;
@@ -113,7 +111,7 @@ static uint8_t render_scene()
     dmat3 m;
     rotation16(m, yaw, pitch);
 
-    inv16(256+128);
+    //inv16(256+128);
 
 #if PERFDOOM
     for(int i = 0; i < PERFDOOM; ++i) {

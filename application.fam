@@ -1,0 +1,17 @@
+App(
+    appid="apfx_golf",
+    name="ArduGolf",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="arduboy_app",
+    cdefines=["APP_WOLFEN"],
+    requires=["gui"],
+    stack_size=8 * 1024,
+    fap_category="Games",
+    fap_icon="ArduGolf.png",
+    fap_icon_assets="assets",
+    order=36,
+    fap_author="@apfxtech",
+    fap_weburl="https://github.com/apfxtech/FlipperWolfenstein.git",
+    fap_version="1.0",
+    fap_description="Play the port of Wolfenduino game on your Flipper Zero.",
+)
