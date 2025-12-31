@@ -11,14 +11,9 @@
 
 #include "fx_courses.hpp"
 
-
 void fx_read_data_bytes(uint24_t addr, uint8_t* dst, size_t n)
 {
-#ifdef ARDUINO
     FX::readDataBytes(addr, dst, n);
-#else
-    memcpy(dst, FX_DATA + addr, n);
-#endif
 }
 
 static array<uint8_t, 19> fx_header;
@@ -30,7 +25,7 @@ static constexpr uint8_t NUM_COURSES =
 
 #else
 
-#include "levels/levels_default.hpp"
+#include "levels_default.hpp"
 
 static auto const* const LEVELS = LEVELS_DEFAULT;
 static constexpr uint8_t NUM_LEVELS =

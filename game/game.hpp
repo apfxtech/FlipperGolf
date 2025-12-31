@@ -11,7 +11,11 @@ static constexpr int FBH = 1 * 64;
 #define DEBUG_SERIAL 0
 
 #ifndef ARDUGOLF_FX
-#define ARDUGOLF_FX 1
+#define ARDUGOLF_FX 0
+#endif
+
+#ifndef memcpy_P
+#define memcpy_P memcpy
 #endif
 
 #define USE_AVR_INLINE_ASM 1

@@ -146,8 +146,6 @@ uint8_t poll_btns() {
 // ---------------- App entry ----------------
 extern "C" int32_t arduboy_app(void* p) {
     UNUSED(p);
-
-    // гарантируем что buf указывает на framebuffer
     buf = g_framebuffer;
 
     g_state = (FlipperState*)malloc(sizeof(FlipperState));
@@ -161,22 +159,18 @@ extern "C" int32_t arduboy_app(void* p) {
         return -1;
     }
 
+    (void)FX::begin(0, 0);
     memset(g_framebuffer, 0x00, FB_SIZE);
     g_state->input_state = 0;
     g_state->exit_requested = false;
-
-    // GUI
     g_state->gui = (Gui*)furi_record_open(RECORD_GUI);
     gui_add_framebuffer_callback(g_state->gui, framebuffer_commit_callback, g_state);
     g_state->canvas = gui_direct_draw_acquire(g_state->gui);
-
-    // Input
     g_state->input_events = (FuriPubSub*)furi_record_open(RECORD_INPUT_EVENTS);
     g_state->input_sub = furi_pubsub_subscribe(
         g_state->input_events, input_events_callback, nullptr
     );
 
-    // Arduboy2 init (даёт inputContext и связывает input_state/mutex/exit_requested)
     a.begin(g_framebuffer, &g_state->input_state, g_state->mutex, &g_state->exit_requested);
     a.audio.begin();
 
@@ -189,13 +183,8 @@ extern "C" int32_t arduboy_app(void* p) {
     // seed RNG
     rand_seed = (uint16_t)((furi_hal_random_get() % 65534u) + 1u);
 
-    // FX init (если реально используешь чтение данных из FX)
-    (void)FX::begin(0, 0);
 
-    // game init
     game_setup();
-
-    // ---- ПЕРВЫЙ КАДР (чтобы не было "черного экрана" если дальше что-то стопорится) ----
     furi_mutex_acquire(g_state->mutex, FuriWaitForever);
     game_loop();
     furi_mutex_release(g_state->mutex);

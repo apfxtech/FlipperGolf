@@ -5,14 +5,13 @@
 static constexpr uint16_t EEPROM_START_ADDRESS = 700;
 
 #if defined(ARDUINO)
-#include <avr/eeprom.h>
-static uint8_t eeprom_read(uint16_t i)
-{
-    return eeprom_read_byte((uint8_t const*)(uintptr_t)i);
+#include "lib/EEPROM.h"
+static inline uint8_t eeprom_read(int addr) {
+    return EEPROM.read((int)(uintptr_t)addr);
 }
-static void eeprom_update(uint16_t i, uint8_t d)
-{
-    eeprom_update_byte((uint8_t*)(uintptr_t)i, d);
+
+static inline void eeprom_update(int addr, uint8_t value) {
+    EEPROM.update((int)(uintptr_t)addr, value);
 }
 #else
 static array<uint8_t, 1024> eeprom_data;

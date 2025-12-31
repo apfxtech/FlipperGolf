@@ -10,7 +10,7 @@
 
 class EEPROMClass {
 public:
-    static constexpr int kSize = 16;
+    static constexpr int kSize = 1024;
 
     EEPROMClass()
         : loaded_(false)
