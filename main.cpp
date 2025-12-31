@@ -137,8 +137,8 @@ uint8_t poll_btns() {
     if(a.pressed(DOWN_BUTTON))  out |= BTN_DOWN;
     if(a.pressed(LEFT_BUTTON))  out |= BTN_LEFT;
     if(a.pressed(RIGHT_BUTTON)) out |= BTN_RIGHT;
-    if(a.pressed(A_BUTTON))     out |= BTN_A;
-    if(a.pressed(B_BUTTON))     out |= BTN_B;
+    if(a.pressed(A_BUTTON))     out |= BTN_B;
+    if(a.pressed(B_BUTTON))     out |= BTN_A;
 
     return out;
 }
