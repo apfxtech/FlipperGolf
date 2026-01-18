@@ -11,11 +11,12 @@
 #include "game/game.hpp"
 #include "lib/Arduboy2.h"
 #include "lib/ArduboyTones.h"
+#include "lib/EEPROM.h"
 //#include "lib/ArduboyFX.h"
 
-#define DISPLAY_WIDTH 128
+#define DISPLAY_WIDTH  128
 #define DISPLAY_HEIGHT 64
-#define FB_SIZE (DISPLAY_WIDTH * DISPLAY_HEIGHT / 8)
+#define FB_SIZE        (DISPLAY_WIDTH * DISPLAY_HEIGHT / 8)
 
 FuriMessageQueue* g_arduboy_sound_queue = NULL;
 FuriThread* g_arduboy_sound_thread = NULL;
@@ -34,8 +35,10 @@ static uint8_t g_framebuffer[FB_SIZE];
 uint8_t* buf = g_framebuffer;
 
 static bool (*g_audio_enabled_cb)() = NULL;
-static bool audio_enabled_cb_impl() { return a.audio.enabled(); }
-ArduboyTones sound((bool(*)())0);
+static bool audio_enabled_cb_impl() {
+    return a.audio.enabled();
+}
+ArduboyTones sound((bool (*)())0);
 
 typedef struct {
     Gui* gui;
@@ -69,8 +72,7 @@ static void framebuffer_commit_callback(
     uint8_t* data,
     size_t size,
     CanvasOrientation orientation,
-    void* context
-) {
+    void* context) {
     __atomic_fetch_add(&s_fb_cb_inflight, 1, __ATOMIC_RELAXED);
 
     (void)orientation;
@@ -140,13 +142,13 @@ uint8_t poll_btns() {
     a.pollButtons();
 
     uint8_t out = 0;
-    if(a.pressed(UP_BUTTON))    out |= BTN_UP;
-    if(a.pressed(DOWN_BUTTON))  out |= BTN_DOWN;
-    if(a.pressed(LEFT_BUTTON))  out |= BTN_LEFT;
+    if(a.pressed(UP_BUTTON)) out |= BTN_UP;
+    if(a.pressed(DOWN_BUTTON)) out |= BTN_DOWN;
+    if(a.pressed(LEFT_BUTTON)) out |= BTN_LEFT;
     if(a.pressed(RIGHT_BUTTON)) out |= BTN_RIGHT;
 
-    if(a.pressed(A_BUTTON))     out |= BTN_B;
-    if(a.pressed(B_BUTTON))     out |= BTN_A;
+    if(a.pressed(A_BUTTON)) out |= BTN_B;
+    if(a.pressed(B_BUTTON)) out |= BTN_A;
 
     return out;
 }
@@ -214,7 +216,7 @@ extern "C" int32_t arduboy_app(void* p) {
 
         g_audio_enabled_cb = audio_enabled_cb_impl;
         sound.~ArduboyTones();
-        new (&sound) ArduboyTones(g_audio_enabled_cb);
+        new(&sound) ArduboyTones(g_audio_enabled_cb);
 
         rand_seed = (uint16_t)((furi_hal_random_get() % 65534u) + 1u);
 
@@ -244,7 +246,10 @@ extern "C" int32_t arduboy_app(void* p) {
             InputEvent ev;
             while(q_local && (furi_message_queue_get(q_local, &ev, 0) == FuriStatusOk)) {
                 if(ev.key == InputKeyBack && ev.type == InputTypeLong) {
-                    st->exit_requested = true;
+                    uint8_t gst = (uint8_t)state;
+                    if(gst == 0) {
+                        st->exit_requested = true;
+                    }
                     break;
                 }
                 InputEvent tmp = ev;
@@ -269,6 +274,8 @@ extern "C" int32_t arduboy_app(void* p) {
 
     sound.noTone();
     a.audio.off();
+    furi_delay_ms(100);
+    EEPROM.commit();
 
     __atomic_store_n(&s_input_queue, (FuriMessageQueue*)NULL, __ATOMIC_RELEASE);
 
@@ -310,7 +317,7 @@ extern "C" int32_t arduboy_app(void* p) {
     }
 
     sound.~ArduboyTones();
-    new (&sound) ArduboyTones((bool(*)())0);
+    new(&sound) ArduboyTones((bool (*)())0);
     g_audio_enabled_cb = NULL;
 
     if(st->fb_mutex) {
