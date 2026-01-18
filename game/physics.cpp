@@ -25,30 +25,28 @@ static constexpr int16_t STOP_VEL = 256;
 static constexpr uint8_t STOP_VEL_MAX_STEPS = 30;
 
 // square unsigned (x >= 0)
-static constexpr uint32_t FORCEINLINE squ(int16_t x)
-{
+static constexpr uint32_t FORCEINLINE squ(int16_t x) {
     return uint32_t(int32_t(x) * x);
 }
 
 static constexpr uint32_t BALL_RADIUS_SQ = squ(BALL_RADIUS);
 
-uint32_t sqdist_point_aabb(dvec3 size, dvec3 pt)
-{
+uint32_t sqdist_point_aabb(dvec3 size, dvec3 pt) {
     uint32_t d = 0;
     {
         int16_t pv = pt.x, bv = size.x;
         if(pv < -bv) d += squ(pv + bv);
-        if(pv >  bv) d += squ(pv - bv);
+        if(pv > bv) d += squ(pv - bv);
     }
     {
         int16_t pv = pt.y, bv = size.y;
         if(pv < -bv) d += squ(pv + bv);
-        if(pv >  bv) d += squ(pv - bv);
+        if(pv > bv) d += squ(pv - bv);
     }
     {
         int16_t pv = pt.z, bv = size.z;
         if(pv < -bv) d += squ(pv + bv);
-        if(pv >  bv) d += squ(pv - bv);
+        if(pv > bv) d += squ(pv - bv);
     }
     return d;
 }
@@ -92,8 +90,7 @@ If m = 1, I = 1/8, en = 1/2, et = 1, rp = -(1/2)n, and t is orthogonal to rp:
 
 */
 
-static dvec3 cross(dvec3 a, dvec3 b)
-{
+static dvec3 cross(dvec3 a, dvec3 b) {
     dvec3 r;
     r.x = mul_f8_s16(a.y, b.z) - mul_f8_s16(a.z, b.y);
     r.y = mul_f8_s16(a.z, b.x) - mul_f8_s16(a.x, b.z);
@@ -101,8 +98,7 @@ static dvec3 cross(dvec3 a, dvec3 b)
     return r;
 }
 
-static void physics_collision(phys_box const& b)
-{
+static void physics_collision(phys_box const& b) {
     mat3 m;
 
     dvec3 pt;
@@ -110,8 +106,7 @@ static void physics_collision(phys_box const& b)
     pt.y = ball.y - b.pos.y * BOX_POS_FACTOR;
     pt.z = ball.z - b.pos.z * BOX_POS_FACTOR;
 
-    if(b.yaw != 0 || b.pitch != 0)
-    {
+    if(b.yaw != 0 || b.pitch != 0) {
         rotation_phys(m, b.yaw, b.pitch);
         // rotate pt
         pt = matvec_t(m, pt);
@@ -123,8 +118,7 @@ static void physics_collision(phys_box const& b)
     bsize.z = b.size.z * BOX_SIZE_FACTOR;
 
     // early exit if no collision
-    if(sqdist_point_aabb(bsize, pt) > BALL_RADIUS_SQ)
-        return;
+    if(sqdist_point_aabb(bsize, pt) > BALL_RADIUS_SQ) return;
 
     // find contact point on box
     dvec3 cpt;
@@ -143,8 +137,7 @@ static void physics_collision(phys_box const& b)
 
     normal = normalized(normal);
 
-    if(b.yaw != 0 || b.pitch != 0)
-    {
+    if(b.yaw != 0 || b.pitch != 0) {
         // rotate normal
         normal = matvec(m, normal);
     }
@@ -154,10 +147,11 @@ static void physics_collision(phys_box const& b)
     // ignore collision if normal is aligned with current velocity; this
     // happens in case collision has been processed but failed to
     // resolve penetration
-    if(normdot > 0)
-        return;
+    if(normdot > 0) return;
 
-    if(normdot < -256 * 4){play_tone(120, 50);}
+    if(normdot < -256 * 4) {
+        play_tone(120, 50);
+    }
 
     // attempt to resolve penetration
 #if 0
@@ -188,10 +182,10 @@ static void physics_collision(phys_box const& b)
         int16_t t0 = -dot(vp, normal);
         int16_t t1 = -dot(vp, tangent);
         t0 += mul_f8_s16(t0, RESTITUTION);
-        t1  = mul_f8_s16(t1, uint8_t(256 / 3));
-        Jv.x  = mul_f8_s16(t0,  normal.x);
-        Jv.y  = mul_f8_s16(t0,  normal.y);
-        Jv.z  = mul_f8_s16(t0,  normal.z);
+        t1 = mul_f8_s16(t1, uint8_t(256 / 3));
+        Jv.x = mul_f8_s16(t0, normal.x);
+        Jv.y = mul_f8_s16(t0, normal.y);
+        Jv.z = mul_f8_s16(t0, normal.z);
         Jv.x += mul_f8_s16(t1, tangent.x);
         Jv.y += mul_f8_s16(t1, tangent.y);
         Jv.z += mul_f8_s16(t1, tangent.z);
@@ -211,8 +205,7 @@ static void physics_collision(phys_box const& b)
     }
 }
 
-static void main_step()
-{
+static void main_step() {
     ball_vel.y -= GRAVITY;
 
     ball_vel.x = tclamp<int16_t>(ball_vel.x, -MAX_VEL, MAX_VEL);
@@ -229,30 +222,27 @@ static void main_step()
         physics_collision(buf_boxes[i]);
 }
 
-bool physics_step()
-{
-    for(uint8_t i = 0; i < 4; ++i)
-    {
+bool physics_step() {
+    for(uint8_t i = 0; i < 4; ++i) {
         main_step();
 
-        // angular damping
-        // these lines do not compile to multiplies
-        ball_vel_ang.x = int16_t(u24(s24(ball_vel_ang.x) * 255 + 0x80) >> 8);
-        ball_vel_ang.y = int16_t(u24(s24(ball_vel_ang.y) * 255 + 0x80) >> 8);
-        ball_vel_ang.z = int16_t(u24(s24(ball_vel_ang.z) * 255 + 0x80) >> 8);
+        ball_vel_ang.x = (int16_t)((((int32_t)ball_vel_ang.x * 255) + 0x80) >> 8);
+        ball_vel_ang.y = (int16_t)((((int32_t)ball_vel_ang.y * 255) + 0x80) >> 8);
+        ball_vel_ang.z = (int16_t)((((int32_t)ball_vel_ang.z * 255) + 0x80) >> 8);
     }
+
     if(tmax(tabs(ball_vel.x), tabs(ball_vel.y), tabs(ball_vel.z)) < STOP_VEL)
         ++stop_vel_steps;
     else
         stop_vel_steps = 0;
-    bool done =
-        steps >= MAX_STEPS ||
-        stop_vel_steps >= STOP_VEL_MAX_STEPS;
-    if(done)
-    {
+
+    bool done = steps >= MAX_STEPS || stop_vel_steps >= STOP_VEL_MAX_STEPS;
+
+    if(done) {
         steps = 0;
         stop_vel_steps = 0;
         ball_vel = {};
     }
+
     return done;
 }
