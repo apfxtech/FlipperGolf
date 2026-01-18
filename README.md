@@ -53,7 +53,7 @@ Build the base firmware using the **Flipper Build Tool (fbt)** to verify that yo
 2. Build the application (`.fap` file) using the following command:
 
 ```bash
-./fbt fap_ardugolf && mv mv build/f7-firmware-D/.extapps/ardugolf.fap ./applications_user/Minigolf/package
+./fbt fap_ardugolf && mv mv build/f7-firmware-D/.extapps/ardugolf.fap ./
 ```
 
 After a successful build, the resulting application file can be found in the `build/` directory.
